@@ -1,0 +1,261 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  PROVIDER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum ProviderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum RequestStatus {
+  OPEN
+  QUOTED
+  HIRED
+  COMPLETED
+  CANCELLED
+}
+
+enum QuoteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  phone         String?   @unique
+  password      String?
+  image         String?
+  role          Role      @default(CUSTOMER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  customerProfile CustomerProfile?
+  providerProfile ProviderProfile?
+  
+  // Relations
+  requests      ServiceRequest[]  @relation("CustomerRequests")
+  threads       MessageThread[]   @relation("ThreadParticipants")
+  sentMessages  Message[]
+  reviews       Review[]          @relation("GivenReviews")
+  receivedReviews Review[]        @relation("ReceivedReviews")
+  wallet        Wallet?
+}
+
+model CustomerProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address     String?
+  city        String?
+  district    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProviderProfile {
+  id              String         @id @default(cuid())
+  userId          String         @unique
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName     String?
+  bio             String?        @db.Text
+  taxOffice       String?
+  taxNumber       String?
+  iban            String?
+  city            String?
+  districts       String[]       // Hizmet verilen ilçeler
+  averageRating   Float          @default(0.0)
+  totalReviews    Int            @default(0)
+  status          ProviderStatus @default(PENDING)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  documents       ProviderDocument[]
+  categories      ProviderCategory[]
+  quotes          Quote[]
+}
+
+model ProviderDocument {
+  id                String          @id @default(cuid())
+  providerProfileId String
+  providerProfile   ProviderProfile @relation(fields: [providerProfileId], references: [id], onDelete: Cascade)
+  type              String          // KİMLİK, VERGİ_LEVHASI, SABIKA_KAYDI vb.
+  fileUrl           String
+  isVerified        Boolean         @default(false)
+  uploadedAt        DateTime        @default(now())
+}
+
+model ServiceCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?   @db.Text
+  icon        String?
+  parentId    String?
+  parent      ServiceCategory?  @relation("SubCategories", fields: [parentId], references: [id])
+  children    ServiceCategory[] @relation("SubCategories")
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  questions   CategoryQuestion[]
+  providers   ProviderCategory[]
+  requests    ServiceRequest[]
+}
+
+model ProviderCategory {
+  providerId String
+  categoryId String
+  provider   ProviderProfile  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  category   ServiceCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([providerId, categoryId])
+}
+
+model CategoryQuestion {
+  id            String            @id @default(cuid())
+  categoryId    String
+  category      ServiceCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  questionText  String
+  questionType  String            // SELECT, MULTI_SELECT, TEXT, NUMBER
+  isRequired    Boolean           @default(true)
+  order         Int               @default(0)
+  options       QuestionOption[]
+  
+  answers       RequestAnswer[]
+}
+
+model QuestionOption {
+  id         String           @id @default(cuid())
+  questionId String
+  question   CategoryQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  label      String
+  value      String
+  order      Int              @default(0)
+}
+
+model ServiceRequest {
+  id           String          @id @default(cuid())
+  customerId   String
+  customer     User            @relation("CustomerRequests", fields: [customerId], references: [id])
+  categoryId   String
+  category     ServiceCategory @relation(fields: [categoryId], references: [id])
+  city         String
+  district     String
+  address      String?         @db.Text
+  status       RequestStatus   @default(OPEN)
+  urgency      String?         // ACİL, 1 HAFTA İÇİNDE, TARİH BELLİ DEĞİL
+  targetDate   DateTime?
+  budget       String?
+  description  String?         @db.Text
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  answers      RequestAnswer[]
+  quotes       Quote[]
+  hiredQuoteId String?         @unique // Eğer bir teklif kabul edildiyse
+  review       Review?
+}
+
+model RequestAnswer {
+  id         String           @id @default(cuid())
+  requestId  String
+  request    ServiceRequest   @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  questionId String
+  question   CategoryQuestion @relation(fields: [questionId], references: [id])
+  answer     String           @db.Text // JSON veya text formatında cevap
+}
+
+model Quote {
+  id          String         @id @default(cuid())
+  requestId   String
+  request     ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  providerId  String
+  provider    ProviderProfile@relation(fields: [providerId], references: [id], onDelete: Cascade)
+  priceAmount Float
+  priceType   String         // SABİT_FİYAT, SAATLİK, KEŞİF_GEREKİR vb.
+  coverLetter String         @db.Text
+  creditCost  Int            // Bu teklifi vermek için düşülen kredi miktarı
+  status      QuoteStatus    @default(PENDING)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  thread      MessageThread?
+}
+
+model MessageThread {
+  id        String   @id @default(cuid())
+  quoteId   String   @unique
+  quote     Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  participants User[]      @relation("ThreadParticipants")
+  messages     Message[]
+}
+
+model Message {
+  id        String        @id @default(cuid())
+  threadId  String
+  thread    MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User          @relation(fields: [senderId], references: [id])
+  content   String        @db.Text
+  isRead    Boolean       @default(false)
+  createdAt DateTime      @default(now())
+}
+
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance   Int      @default(0) // Kredi miktarı
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id        String   @id @default(cuid())
+  walletId  String
+  wallet    Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  amount    Int
+  type      String   // CREDIT (Yükleme), DEBIT (Harcama)
+  reason    String   // "ID'li talebe teklif verildi" vb.
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id          String         @id @default(cuid())
+  requestId   String         @unique
+  request     ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  customerId  String
+  customer    User           @relation("GivenReviews", fields: [customerId], references: [id])
+  providerId  String
+  provider    User           @relation("ReceivedReviews", fields: [providerId], references: [id])
+  rating      Int            // 1-5 arası
+  comment     String?        @db.Text
+  isApproved  Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+}
