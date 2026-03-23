@@ -1,11 +1,17 @@
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import UserMenu from "./UserMenu"
 
-export default function Header() {
+export default async function Header() {
+  const session = await getServerSession(authOptions)
+  const user = session?.user
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
           <div className="flex-shrink-0 flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
               <span className="text-white font-bold text-xl">A</span>
@@ -14,23 +20,54 @@ export default function Header() {
               ANANAS
             </Link>
           </div>
-          
+
+          {/* Orta Nav */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/nasil-calisir" className="text-sm font-medium text-gray-600 hover:text-indigo-600">
+            <Link href="/nasil-calisir" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
               Nasıl Çalışır?
             </Link>
-            <Link href="/hizmet-veren-ol" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
-              Hizmet Veren Ol
-            </Link>
+            {/* Giriş yapmamışsa Hizmet Veren Ol göster */}
+            {!user && (
+              <Link href="/auth/register" className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
+                Hizmet Veren Ol
+              </Link>
+            )}
+            {/* Müşteriye Taleplerim linki */}
+            {user?.role === "CUSTOMER" && (
+              <Link href="/musteri/taleplerim" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
+                Taleplerim
+              </Link>
+            )}
+            {/* Hizmet verence fırsatlar linki */}
+            {user?.role === "PROVIDER" && (
+              <Link href="/hizmet-veren/firsatlar" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
+                Fırsatlar
+              </Link>
+            )}
           </nav>
 
+          {/* Sağ Taraf */}
           <div className="flex items-center gap-4">
-            <Link href="/auth/login" className="text-sm font-medium text-gray-700 hover:text-indigo-600 hidden sm:block">
-              Giriş Yap
-            </Link>
-            <Link href="/auth/register" className="bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 px-6 py-2.5 rounded-full transition-colors">
-              Kayıt Ol
-            </Link>
+            {user ? (
+              /* Giriş yapılmış → Kullanıcı Menüsü */
+              <UserMenu user={{ name: user.name, email: user.email, role: user.role }} />
+            ) : (
+              /* Giriş yapılmamış → Giriş Yap + Kayıt Ol */
+              <>
+                <Link
+                  href="/auth/login"
+                  className="text-sm font-medium text-gray-700 hover:text-indigo-600 hidden sm:block transition-colors"
+                >
+                  Giriş Yap
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 px-5 py-2.5 rounded-full transition-colors shadow-sm"
+                >
+                  Kayıt Ol
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
