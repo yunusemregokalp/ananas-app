@@ -28,8 +28,8 @@ export default function Header() {
             <Link href="/auth/login" className="text-sm font-medium text-gray-700 hover:text-indigo-600 hidden sm:block">
               Giriş Yap
             </Link>
-            <Link href="/auth/login" className="bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 px-6 py-2.5 rounded-full transition-colors">
-              Hemen Başla
+            <Link href="/auth/register" className="bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 px-6 py-2.5 rounded-full transition-colors">
+              Kayıt Ol
             </Link>
           </div>
         </div>

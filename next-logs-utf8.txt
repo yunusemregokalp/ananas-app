@@ -1,0 +1,19 @@
+﻿
+> ananas-app@0.1.0 dev
+> next dev
+
+npm.cmd : ÔÜá Port 3000 is in use by process 40384, using available port 3001 instead.
+At line:1 char:68
++ ... op\PROGRAMLAR\ANANAS\ananas-app; npm.cmd run dev > next-logs.txt 2>&1
++                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ÔÜá Port 3000 i...t 3001 instead.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Ôû▓ Next.js 16.2.1 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.1.103:3001
+- Environments: .env
+Ô£ô Ready in 778ms
+ÔÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/mes
+sages/middleware-to-proxy
+
