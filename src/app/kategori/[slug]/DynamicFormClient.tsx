@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
+import { createServiceRequest } from "@/app/actions/request"
 
 type Question = {
   id: string
@@ -19,11 +20,10 @@ type Question = {
 export default function DynamicFormClient({ categoryId, questions }: { categoryId: string, questions: Question[] }) {
   const router = useRouter()
   const [answers, setAnswers] = useState<Record<string, string>>({})
-  const [step, setStep] = useState(0)
+  const [city, setCity] = useState("")
+  const [district, setDistrict] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  // Basit bir sayfalama mantığı: Her adımda 1 soru sor veya tümünü tek sayfada göster.
-  // MVP için tüm soruları tek sayfada topluyoruz, UX için bölümler ayrılabilir.
-  
   const handleSelectChange = (questionId: string, value: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }))
   }
@@ -34,10 +34,30 @@ export default function DynamicFormClient({ categoryId, questions }: { categoryI
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Sunucuya (Server Action) gönder: 
-    // answers JSON'ı, userId (oturum varsa), lokasyon bilgileri.
-    alert("Cevaplar: " + JSON.stringify(answers))
-    // Örnek: router.push("/talep-basarili")
+    setLoading(true)
+
+    const res = await createServiceRequest({
+      categoryId,
+      city,
+      district,
+      answers,
+    })
+
+    setLoading(false)
+
+    if (res?.error === "unauthenticated") {
+      router.push(`/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`)
+      return
+    }
+
+    if (res?.error) {
+      alert(res.error)
+      return
+    }
+
+    if (res?.success) {
+      router.push("/musteri/taleplerim")
+    }
   }
 
   return (
@@ -51,7 +71,7 @@ export default function DynamicFormClient({ categoryId, questions }: { categoryI
           {q.questionType === "SELECT" && (
             <Select 
               required={q.isRequired} 
-              onValueChange={(val) => handleSelectChange(q.id, val)}
+              onValueChange={(val) => handleSelectChange(q.id, val || "")}
               value={answers[q.id]}
             >
               <SelectTrigger>
@@ -99,18 +119,28 @@ export default function DynamicFormClient({ categoryId, questions }: { categoryI
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <Label>İl</Label>
-            <Input placeholder="Örn: İstanbul" required />
+            <Input 
+              placeholder="Örn: İstanbul" 
+              required 
+              value={city}
+              onChange={e => setCity(e.target.value)}
+            />
           </div>
           <div>
             <Label>İlçe</Label>
-            <Input placeholder="Örn: Kadıköy" required />
+            <Input 
+              placeholder="Örn: Kadıköy" 
+              required 
+              value={district}
+              onChange={e => setDistrict(e.target.value)}
+            />
           </div>
         </div>
       </div>
 
       <div className="pt-6">
-        <Button type="submit" className="w-full text-lg h-12">
-          Talebi Gönder ve Ücretsiz Teklif Al
+        <Button disabled={loading} type="submit" className="w-full text-lg h-12">
+          {loading ? "Gönderiliyor..." : "Talebi Gönder ve Ücretsiz Teklif Al"}
         </Button>
       </div>
     </form>
