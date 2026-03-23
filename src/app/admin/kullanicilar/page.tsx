@@ -2,9 +2,10 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { ApproveButton, RejectButton } from "./AdminButtons"
 
 export default async function AdminUsersPage() {
   const session = await getServerSession(authOptions)
@@ -17,11 +18,8 @@ export default async function AdminUsersPage() {
     include: {
       providerProfile: true,
       customerProfile: true,
-      _count: {
-        select: {
-          sentMessages: true,
-        }
-      }
+      wallet: true,
+      _count: { select: { sentMessages: true } }
     }
   })
 
@@ -47,11 +45,12 @@ export default async function AdminUsersPage() {
                   <div className="font-semibold text-gray-900">{user.name || "İsimsiz"}</div>
                   <div className="text-sm text-gray-500">
                     {user.email || user.phone || "Bilgi yok"} · {new Date(user.createdAt).toLocaleDateString("tr-TR")}
+                    {user.wallet && <span className="ml-2 text-indigo-600">💎 {user.wallet.balance} kredi</span>}
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant={
                   user.role === "SUPER_ADMIN" ? "destructive" :
                   user.role === "PROVIDER" ? "default" : "secondary"
@@ -62,12 +61,22 @@ export default async function AdminUsersPage() {
 
                 {user.providerProfile && (
                   <Badge variant="outline" className={
-                    user.providerProfile.status === "APPROVED" 
-                      ? "text-green-600 border-green-200 bg-green-50" 
+                    user.providerProfile.status === "APPROVED"
+                      ? "text-green-600 border-green-200 bg-green-50"
+                      : user.providerProfile.status === "REJECTED"
+                      ? "text-red-600 border-red-200 bg-red-50"
                       : "text-yellow-600 border-yellow-200 bg-yellow-50"
                   }>
-                    {user.providerProfile.status === "APPROVED" ? "Onaylı" : "Bekliyor"}
+                    {user.providerProfile.status === "APPROVED" ? "Onaylı" :
+                     user.providerProfile.status === "REJECTED" ? "Reddedildi" : "Bekliyor"}
                   </Badge>
+                )}
+
+                {user.providerProfile && user.providerProfile.status === "PENDING" && (
+                  <>
+                    <ApproveButton userId={user.id} />
+                    <RejectButton userId={user.id} />
+                  </>
                 )}
 
                 {user.providerProfile && (

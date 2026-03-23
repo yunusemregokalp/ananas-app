@@ -60,6 +60,17 @@ model User {
   reviews       Review[]          @relation("GivenReviews")
   receivedReviews Review[]        @relation("ReceivedReviews")
   wallet        Wallet?
+  notifications Notification[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model CustomerProfile {
