@@ -34,7 +34,8 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Platform</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/nasil-calisir" className="hover:text-white transition-colors">Nasıl Çalışır?</Link></li>
-              <li><Link href="/auth/register" className="hover:text-white transition-colors">Hizmet Veren Ol</Link></li>
+              <li><Link href="/hizmet-veren-ol" className="hover:text-white transition-colors">Hizmet Veren Ol</Link></li>
+              <li><Link href="/sss" className="hover:text-white transition-colors">Sıkça Sorulan Sorular</Link></li>
               <li><Link href="/auth/login" className="hover:text-white transition-colors">Giriş Yap</Link></li>
             </ul>
           </div>
@@ -56,9 +57,9 @@ export default function Footer() {
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm">© {new Date().getFullYear()} ANANAS. Tüm hakları saklıdır.</p>
           <div className="flex gap-6 text-sm">
-            <Link href="#" className="hover:text-white transition-colors">Gizlilik Politikası</Link>
-            <Link href="#" className="hover:text-white transition-colors">Kullanım Koşulları</Link>
-            <Link href="#" className="hover:text-white transition-colors">KVKK</Link>
+            <Link href="/gizlilik" className="hover:text-white transition-colors">Gizlilik Politikası</Link>
+            <Link href="/kullanim-kosullari" className="hover:text-white transition-colors">Kullanım Koşulları</Link>
+            <Link href="/sss" className="hover:text-white transition-colors">SSS</Link>
           </div>
         </div>
       </div>
