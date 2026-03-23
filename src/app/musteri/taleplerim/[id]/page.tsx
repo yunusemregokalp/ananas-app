@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import StartChatButton from "./StartChatButton"
 
 export default async function CustomerRequestDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
@@ -100,7 +101,7 @@ export default async function CustomerRequestDetailPage({ params }: { params: { 
                   </p>
                 </CardContent>
                 <CardFooter className="bg-muted/20 border-t pt-4 flex justify-end gap-3">
-                  <Button variant="outline">Mesaj At</Button>
+                  <StartChatButton quoteId={quote.id} />
                   <Button variant="default">Anlaş / İşi Ver</Button>
                 </CardFooter>
               </Card>
