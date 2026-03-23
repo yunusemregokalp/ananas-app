@@ -72,6 +72,10 @@ export default function UserMenu({ user }: { user: User }) {
 
             {isProvider && (
               <>
+                <Link href="/hizmet-veren/panel" onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                  <span>📊</span> Panelim
+                </Link>
                 <Link href="/hizmet-veren/firsatlar" onClick={() => setOpen(false)}
                   className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
                   <span>⚡</span> Fırsatlarım
