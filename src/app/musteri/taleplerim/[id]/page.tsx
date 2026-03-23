@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
@@ -100,7 +101,9 @@ export default async function CustomerRequestDetailPage({ params }: { params: { 
                   <CardHeader className="pb-2 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                     <div>
                       <CardTitle className="text-xl flex items-center gap-2">
-                         {quote.provider.companyName || quote.provider.user.name}
+                         <Link href={`/hizmet-veren/profil/${quote.provider.userId}`} className="hover:text-primary transition-colors hover:underline">
+                           {quote.provider.companyName || quote.provider.user.name}
+                         </Link>
                          {quote.provider.status === "APPROVED" && (
                             <Badge variant="outline" className="text-xs text-green-600 border-green-200 bg-green-50">Onaylı Profil</Badge>
                          )}
