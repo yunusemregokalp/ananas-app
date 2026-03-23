@@ -28,7 +28,7 @@ export default async function Header() {
               Nasıl Çalışır?
             </Link>
             {!user && (
-              <Link href="/auth/register" className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
+              <Link href="/hizmet-veren-ol" className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
                 Hizmet Veren Ol
               </Link>
             )}
