@@ -32,7 +32,7 @@ export default async function CategoryPage(
       </div>
       
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-        <DynamicFormClient categoryId={category.id} questions={category.questions} />
+        <DynamicFormClient categoryId={category.id} categoryName={category.name} questions={category.questions} />
       </div>
     </div>
   )

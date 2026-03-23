@@ -80,6 +80,10 @@ export default function UserMenu({ user }: { user: User }) {
                   className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
                   <span>⚡</span> Fırsatlarım
                 </Link>
+                <Link href="/hizmet-veren/tekliflerim" onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                  <span>📋</span> Tekliflerim
+                </Link>
                 <Link href="/hizmet-veren/kredi" onClick={() => setOpen(false)}
                   className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
                   <span>💎</span> Kredi Yükle
