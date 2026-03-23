@@ -2,6 +2,7 @@ import Link from "next/link"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import UserMenu from "./UserMenu"
+import MobileMenu from "./MobileMenu"
 
 export default async function Header() {
   const session = await getServerSession(authOptions)
@@ -21,24 +22,21 @@ export default async function Header() {
             </Link>
           </div>
 
-          {/* Orta Nav */}
+          {/* Desktop Nav */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link href="/nasil-calisir" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
               Nasıl Çalışır?
             </Link>
-            {/* Giriş yapmamışsa Hizmet Veren Ol göster */}
             {!user && (
               <Link href="/auth/register" className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
                 Hizmet Veren Ol
               </Link>
             )}
-            {/* Müşteriye Taleplerim linki */}
             {user?.role === "CUSTOMER" && (
               <Link href="/musteri/taleplerim" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
                 Taleplerim
               </Link>
             )}
-            {/* Hizmet verence fırsatlar linki */}
             {user?.role === "PROVIDER" && (
               <Link href="/hizmet-veren/firsatlar" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
                 Fırsatlar
@@ -47,27 +45,21 @@ export default async function Header() {
           </nav>
 
           {/* Sağ Taraf */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {user ? (
-              /* Giriş yapılmış → Kullanıcı Menüsü */
               <UserMenu user={{ name: user.name, email: user.email, role: user.role }} />
             ) : (
-              /* Giriş yapılmamış → Giriş Yap + Kayıt Ol */
-              <>
-                <Link
-                  href="/auth/login"
-                  className="text-sm font-medium text-gray-700 hover:text-indigo-600 hidden sm:block transition-colors"
-                >
+              <div className="hidden md:flex items-center gap-4">
+                <Link href="/auth/login" className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">
                   Giriş Yap
                 </Link>
-                <Link
-                  href="/auth/register"
-                  className="bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 px-5 py-2.5 rounded-full transition-colors shadow-sm"
-                >
+                <Link href="/auth/register" className="bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 px-5 py-2.5 rounded-full transition-colors shadow-sm">
                   Kayıt Ol
                 </Link>
-              </>
+              </div>
             )}
+            {/* Mobil Menü */}
+            <MobileMenu user={user ? { name: user.name, role: user.role } : null} />
           </div>
         </div>
       </div>

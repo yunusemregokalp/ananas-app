@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { prisma } from "@/lib/prisma"
-import { Search } from "lucide-react"
+import SearchBar from "@/components/SearchBar"
 
 export default async function HomePage() {
   const categories = await prisma.serviceCategory.findMany({
@@ -16,7 +16,6 @@ export default async function HomePage() {
     prisma.review.count(),
   ])
 
-  // Kategori ikonları
   const iconMap: Record<string, string> = {
     "ev-temizligi": "🧹", "nakliyat": "🚚", "boya-badana": "🎨", "tadilat": "🔨",
     "ozel-ders": "📚", "web-tasarim": "💻", "elektrik": "⚡", "tesisat": "🔧",
@@ -40,32 +39,23 @@ export default async function HomePage() {
             Temizlikten nakliyata, boyadan özel derse... Türkiye&apos;nin en güvenilir hizmet platformu ANANAS ile teklifleri anında karşılaştır.
           </p>
 
-          <div className="w-full max-w-2xl bg-white rounded-full flex items-center p-2 shadow-2xl">
-            <Search className="w-6 h-6 text-gray-400 ml-4 flex-shrink-0" />
-            <input
-              type="text"
-              placeholder="Hangi hizmete ihtiyacın var? Örn: Ev Temizliği"
-              className="w-full bg-transparent text-gray-900 px-4 py-3 focus:outline-none text-lg"
-            />
-            <Button size="lg" className="rounded-full px-8 text-base bg-indigo-600 hover:bg-indigo-700 shadow-md">
-              Ara
-            </Button>
-          </div>
+          {/* Canlı Arama */}
+          <SearchBar categories={categories.map(c => ({ id: c.id, name: c.name, slug: c.slug }))} />
 
-          {/* Güven İstatistikleri */}
+          {/* İstatistikler */}
           <div className="flex flex-wrap justify-center gap-8 mt-12 text-indigo-200">
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">{totalProviders}+</div>
+              <div className="text-3xl font-bold text-white">{totalProviders || 1}+</div>
               <div className="text-sm">Onaylı Profesyonel</div>
             </div>
             <div className="w-px bg-indigo-700 hidden sm:block" />
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">{totalRequests}+</div>
+              <div className="text-3xl font-bold text-white">{totalRequests || 0}+</div>
               <div className="text-sm">Tamamlanan İş</div>
             </div>
             <div className="w-px bg-indigo-700 hidden sm:block" />
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">{totalReviews}+</div>
+              <div className="text-3xl font-bold text-white">{totalReviews || 0}+</div>
               <div className="text-sm">Mutlu Müşteri Yorumu</div>
             </div>
           </div>
@@ -79,7 +69,6 @@ export default async function HomePage() {
             <h2 className="text-3xl font-bold text-gray-900">Tüm Hizmet Kategorileri</h2>
             <p className="mt-4 text-lg text-gray-600">Her gün yüzlerce kişinin güvendiği hizmetler</p>
           </div>
-
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {categories.map((cat) => (
               <Link key={cat.id} href={`/kategori/${cat.slug}`} className="group block">
@@ -104,14 +93,12 @@ export default async function HomePage() {
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">3 Adımda Hizmet Al</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: "1", icon: "📝", title: "Talep Oluştur", desc: "İhtiyacınızı seçin, birkaç soruyu cevaplayın." },
-              { step: "2", icon: "📩", title: "Teklif Al", desc: "Bölgenizdeki ustalar size özel fiyat teklifi gönderir." },
-              { step: "3", icon: "🤝", title: "Anlaş & Başla", desc: "Beğendiğiniz ustayla anlaşın, işe hemen başlayın." },
-            ].map((s) => (
-              <div key={s.step} className="text-center">
-                <div className="w-16 h-16 mx-auto bg-indigo-100 rounded-2xl flex items-center justify-center text-3xl mb-4">
-                  {s.icon}
-                </div>
+              { icon: "📝", title: "Talep Oluştur", desc: "İhtiyacınızı seçin, birkaç soruyu cevaplayın." },
+              { icon: "📩", title: "Teklif Al", desc: "Bölgenizdeki ustalar size özel fiyat teklifi gönderir." },
+              { icon: "🤝", title: "Anlaş & Başla", desc: "Beğendiğiniz ustayla anlaşın, işe hemen başlayın." },
+            ].map((s, i) => (
+              <div key={i} className="text-center">
+                <div className="w-16 h-16 mx-auto bg-indigo-100 rounded-2xl flex items-center justify-center text-3xl mb-4">{s.icon}</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{s.title}</h3>
                 <p className="text-gray-600">{s.desc}</p>
               </div>
@@ -119,9 +106,7 @@ export default async function HomePage() {
           </div>
           <div className="text-center mt-10">
             <Link href="/nasil-calisir">
-              <Button variant="outline" className="rounded-full px-8">
-                Detaylı Bilgi →
-              </Button>
+              <Button variant="outline" className="rounded-full px-8">Detaylı Bilgi →</Button>
             </Link>
           </div>
         </div>
